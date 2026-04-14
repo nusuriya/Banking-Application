@@ -1,72 +1,157 @@
+
 package com.example.banking.application.service;
 
 import com.example.banking.application.dto.TransactionRequestDTO;
 import com.example.banking.application.dto.TransactionResponseDTO;
 import com.example.banking.application.entity.Account;
+import com.example.banking.application.entity.IdempotencyKey;
 import com.example.banking.application.entity.Transaction;
-import com.example.banking.application.exception.*;
+import com.example.banking.application.event.TransactionEvent;
+import com.example.banking.application.kafka.TransactionEventProducer;
 import com.example.banking.application.repository.AccountRepository;
+import com.example.banking.application.repository.IdempotencyRepository;
 import com.example.banking.application.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
+
+import com.example.banking.application.exception.AccountClosedException;
+import com.example.banking.application.exception.InsufficientBalanceException;
+import com.example.banking.application.exception.ResourceNotFoundException;
+import com.example.banking.application.exception.SameAccountId;
+
+
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TransactionService {
 
-    private final AccountRepository accountRepo;
-    private final TransactionRepository txRepo;
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final IdempotencyRepository idempotencyRepository;
+    private final TransactionEventProducer producer;
 
-    public TransactionService(AccountRepository accountRepo,
-                              TransactionRepository txRepo) {
-        this.accountRepo = accountRepo;
-        this.txRepo = txRepo;
+    public TransactionService(AccountRepository accountRepository,
+                              TransactionRepository transactionRepository,
+                              IdempotencyRepository idempotencyRepository,
+                              TransactionEventProducer producer) {
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
+        this.idempotencyRepository = idempotencyRepository;
+        this.producer = producer;
     }
 
     @Transactional
-    public TransactionResponseDTO transfer(TransactionRequestDTO dto) {
-        Account from = accountRepo.findById(dto.getFromAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Source account not found"));
-        Account to = accountRepo.findById(dto.getToAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Destination account not found"));
+    public TransactionResponseDTO transfer(String idempotencyKey,
+                                           TransactionRequestDTO dto) {
 
-        // Closed‐account checks now look at the string flag
-        if ("Y".equalsIgnoreCase(from.getIsClosed())) {
+        /* ---------------------------
+           Idempotency check
+           --------------------------- */
+        Optional<IdempotencyKey> existing =
+                idempotencyRepository.findById(idempotencyKey);
+
+        if (existing.isPresent()) {
+            return TransactionResponseDTO.fromJson(existing.get().getResponse());
+        }
+
+        /* ---------------------------
+           Load accounts
+           --------------------------- */
+        Account fromAccount = accountRepository.findById(dto.getFromAccountId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Source account not found"));
+
+        Account toAccount = accountRepository.findById(dto.getToAccountId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Destination account not found"));
+
+        if(dto.getFromAccountId().equals(dto.getToAccountId())) {
+            throw new SameAccountId("Source and Destination account can't be the same");
+        }
+
+        /* ---------------------------
+           Account closed validation
+           --------------------------- */
+        if ("Y".equalsIgnoreCase(fromAccount.getIsClosed())) {
             throw new AccountClosedException("Source account is closed");
         }
-        if ("Y".equalsIgnoreCase(to.getIsClosed())) {
+
+        if ("Y".equalsIgnoreCase(toAccount.getIsClosed())) {
             throw new AccountClosedException("Destination account is closed");
         }
 
-        if (from.getBalance().compareTo(dto.getAmount()) < 0) {
+        /* ---------------------------
+           Balance validation
+           --------------------------- */
+        BigDecimal transferAmount = dto.getAmount();
+
+        if (fromAccount.getBalance().compareTo(transferAmount) < 0) {
             throw new InsufficientBalanceException("Insufficient balance");
         }
 
-        // Perform funds movement
-        from.setBalance(from.getBalance().subtract(dto.getAmount()));
-        to.setBalance(to.getBalance().add(dto.getAmount()));
-        accountRepo.save(from);
-        accountRepo.save(to);
+        /* ---------------------------
+           Update balances
+           --------------------------- */
+        fromAccount.setBalance(fromAccount.getBalance().subtract(transferAmount));
+        toAccount.setBalance(toAccount.getBalance().add(transferAmount));
 
-        // Record the transaction
-        Transaction tx = new Transaction();
-        tx.setFromAccountId(dto.getFromAccountId());
-        tx.setToAccountId(dto.getToAccountId());
-        tx.setAmount(dto.getAmount());
-        tx.setTransactionDate(LocalDateTime.now());
-        tx.setCreditDebitFlag("D");
-        tx.setDescription(dto.getDescription());
-        Transaction saved = txRepo.save(tx);
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
 
-        // Map to response DTO
-        TransactionResponseDTO resp = new TransactionResponseDTO();
-        resp.setTransactionId(saved.getTransactionId());
-        resp.setFromAccountId(saved.getFromAccountId());
-        resp.setToAccountId(saved.getToAccountId());
-        resp.setAmount(saved.getAmount());
-        resp.setTransactionDate(saved.getTransactionDate());
-        resp.setCreditDebitFlag(saved.getCreditDebitFlag());
-        resp.setDescription(saved.getDescription());
-        return resp;
+        /* ---------------------------
+           Persist transactions
+           --------------------------- */
+        Transaction debitTxn = new Transaction(
+                fromAccount.getAccountId(),
+                toAccount.getAccountId(),
+                transferAmount,
+                "D",
+                "Amount debited"
+        );
+
+        Transaction creditTxn = new Transaction(
+                fromAccount.getAccountId(),
+                toAccount.getAccountId(),
+                transferAmount,
+                "C",
+                "Amount credited"
+        );
+
+        transactionRepository.save(debitTxn);
+        transactionRepository.save(creditTxn);
+
+        /* ---------------------------
+           Build response
+           --------------------------- */
+        String referenceId = UUID.randomUUID().toString();
+        TransactionResponseDTO response =
+                new TransactionResponseDTO(referenceId, "SUCCESS");
+
+        /* ---------------------------
+           Save idempotency key
+           --------------------------- */
+        idempotencyRepository.save(
+                new IdempotencyKey(idempotencyKey, response.toJson())
+        );
+
+        /* ---------------------------
+           Publish Kafka event
+           --------------------------- */
+        TransactionEvent event = new TransactionEvent(
+                referenceId,
+                fromAccount.getAccountId(),
+                toAccount.getAccountId(),
+                transferAmount,
+                "COMPLETED",
+                Instant.now()
+        );
+
+        producer.publish(event);
+
+        return response;
     }
 }

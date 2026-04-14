@@ -1,3 +1,4 @@
+
 package com.example.banking.application.entity;
 
 import jakarta.persistence.*;
@@ -7,74 +8,75 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "transaction")
 public class Transaction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transactionid")
     private Integer transactionId;
 
     @Column(name = "from_account", nullable = false)
-    private Integer fromAccountId;
+    private Integer fromAccount;
 
-    @Column(name = "to_account", nullable = false)
-    private Integer toAccountId;
+    @Column(name = "to_account")
+    private Integer toAccount;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
     @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
     @Column(name = "creditdebit", nullable = false, length = 1)
-    private String creditDebitFlag;
+    private String creditDebit; // C or D
 
     @Column(name = "description", length = 255)
     private String description;
 
-    public Transaction() { }
+    // ✅ Required by JPA
+    protected Transaction() {}
 
-    public Transaction(Integer transactionId,
-                       Integer fromAccountId,
-                       Integer toAccountId,
+    // ✅ Constructor used by service
+    public Transaction(Integer fromAccount,
+                       Integer toAccount,
                        BigDecimal amount,
-                       LocalDateTime transactionDate,
-                       String creditDebitFlag,
+                       String creditDebit,
                        String description) {
-        this.transactionId = transactionId;
-        this.fromAccountId = fromAccountId;
-        this.toAccountId = toAccountId;
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
         this.amount = amount;
-        this.transactionDate = transactionDate;
-        this.creditDebitFlag = creditDebitFlag;
+        this.creditDebit = creditDebit;
         this.description = description;
+        this.transactionDate = LocalDateTime.now();
     }
 
-    // getters & setters
+    // Getters only (immutability preferred)
 
-    public Integer getTransactionId() { return transactionId; }
-    public void setTransactionId(Integer transactionId) { this.transactionId = transactionId; }
-    public Integer getFromAccountId() { return fromAccountId; }
-    public void setFromAccountId(Integer fromAccountId) { this.fromAccountId = fromAccountId; }
-    public Integer getToAccountId() { return toAccountId; }
-    public void setToAccountId(Integer toAccountId) { this.toAccountId = toAccountId; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public LocalDateTime getTransactionDate() { return transactionDate; }
-    public void setTransactionDate(LocalDateTime transactionDate) { this.transactionDate = transactionDate; }
-    public String getCreditDebitFlag() { return creditDebitFlag; }
-    public void setCreditDebitFlag(String creditDebitFlag) { this.creditDebitFlag = creditDebitFlag; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public Integer getTransactionId() {
+        return transactionId;
+    }
 
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "transactionId=" + transactionId +
-                ", fromAccountId=" + fromAccountId +
-                ", toAccountId=" + toAccountId +
-                ", amount=" + amount +
-                ", transactionDate=" + transactionDate +
-                ", creditDebitFlag='" + creditDebitFlag + '\'' +
-                ", description='" + description + '\'' +
-                '}';
+    public Integer getFromAccount() {
+        return fromAccount;
+    }
+
+    public Integer getToAccount() {
+        return toAccount;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public LocalDateTime getTransactionDate() {
+        return transactionDate;
+    }
+
+    public String getCreditDebit() {
+        return creditDebit;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
+

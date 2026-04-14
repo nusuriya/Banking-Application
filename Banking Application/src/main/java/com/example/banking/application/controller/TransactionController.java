@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/transactions")
 public class TransactionController {
+
     private final TransactionService service;
 
     public TransactionController(TransactionService service) {
@@ -18,8 +19,10 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponseDTO> transfer(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
             @Valid @RequestBody TransactionRequestDTO dto) {
-        TransactionResponseDTO resp = service.transfer(dto);
-        return ResponseEntity.ok(resp);
+
+        return ResponseEntity.ok(service.transfer(idempotencyKey, dto));
     }
 }
+
