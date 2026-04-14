@@ -18,3 +18,25 @@ The project focuses on real-world concepts such as stateless authentication, lay
 - Global exception handling with meaningful HTTP responses  
 - MySQL integration with Spring Data JPA (Hibernate)  
 - Clean architecture (Controller → Service → Repository)
+
+
+## 📡 API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/auth/register` | Register a new user |
+| POST | `/auth/login` | Authenticate user and generate JWT |
+
+### Accounts
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/api/accounts` | Create a new bank account |
+| GET | `/api/accounts/{id}` | Fetch account by ID |
+| GET | `/api/accounts` | Fetch all accounts |
+| PUT | `/api/accounts/{id}` | Update account details |
+
+### Transactions
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/api/transactions/transfer` | Transfer funds between accounts |
