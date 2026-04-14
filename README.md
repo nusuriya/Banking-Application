@@ -5,15 +5,16 @@ This project is a secure backend banking application built using Spring Boot 3 a
 The application exposes RESTful APIs for user authentication and banking operations, secured with JWT-based authentication using Spring Security 6.
 The project focuses on real-world concepts such as stateless authentication, layered architecture, data persistence with JPA, and robust exception handling.
 
-🚀 Features
 
-✅ User registration and login
-✅ JWT-based authentication (stateless security)
-✅ Secure REST APIs using Spring Security
-✅ Role-based authorization (ROLE_USER, expandable to ROLE_ADMIN)
-✅ Account management functionality
-✅ DTO-based request/response handling
-✅ Input validation using Jakarta Validation (@NotNull, @NotBlank)
-✅ Global exception handling with meaningful HTTP responses
-✅ MySQL integration with Spring Data JPA (Hibernate)
-✅ Clean architecture (Controller → Service → Repository)
+## 🚀 Features
+
+- User registration and login  
+- JWT-based authentication (stateless security)  
+- Secure REST APIs using Spring Security  
+- Role-based authorization (ROLE_USER, expandable to ROLE_ADMIN)  
+- Account management functionality  
+- DTO-based request/response handling  
+- Input validation using Jakarta Validation (`@NotNull`, `@NotBlank`)  
+- Global exception handling with meaningful HTTP responses  
+- MySQL integration with Spring Data JPA (Hibernate)  
+- Clean architecture (Controller → Service → Repository)
