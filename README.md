@@ -40,3 +40,29 @@ The project focuses on real-world concepts such as stateless authentication, lay
 | Method | Endpoint | Description |
 |------|---------|------------|
 | POST | `/api/transactions/transfer` | Transfer funds between accounts |
+
+
+## 🏗️ Architecture Overview
+
+The application follows a layered architecture:
+
+- **Controller Layer** – Exposes REST APIs and handles HTTP requests
+- **Service Layer** – Contains business logic and validations
+- **Repository Layer** – Handles database interactions using Spring Data JPA
+- **Security Layer** – Manages JWT authentication and authorization
+
+This separation improves maintainability, testability, and scalability.
+
+
+## 🗄️ Sample Database Records
+
+### users
+| id | email | role |
+|----|------|------|
+| 1 | user@test.com | ROLE_USER |
+
+### account
+| accountid | email | balance | closed |
+|----------|------|---------|--------|
+| 101 | user@test.com | 5000.00 | N |
+
