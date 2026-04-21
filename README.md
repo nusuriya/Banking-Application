@@ -6,19 +6,19 @@ A secure Spring Boot–based banking backend implementing JWT‑based authentica
 
 ## 🚀 Features
 
--User registration and login
--JWT‑based authentication (stateless security)
--Secure REST APIs using Spring Security
--Role‑based authorization (ROLE_USER, expandable to ROLE_ADMIN)
--Account management (create, update, close, balance tracking)
--Idempotent fund transfer processing (exactly‑once execution)
--Ledger‑style debit and credit transaction recording
--Apache Kafka integration for event‑driven transaction publishing
--DTO‑based request/response handling
--Input validation using Jakarta Validation (@NotNull, @NotBlank)
--Centralized global exception handling with meaningful HTTP responses
--MySQL integration using Spring Data JPA (Hibernate)
--Clean layered architecture (Controller → Service → Repository)
+- User registration and login
+- JWT‑based authentication (stateless security)
+- Secure REST APIs using Spring Security
+- Role‑based authorization (ROLE_USER, expandable to ROLE_ADMIN)
+- Account management (create, update, close, balance tracking)
+- Idempotent fund transfer processing (exactly‑once execution)
+- Ledger‑style debit and credit transaction recording
+- Apache Kafka integration for event‑driven transaction publishing
+- DTO‑based request/response handling
+- Input validation using Jakarta Validation (@NotNull, @NotBlank)
+- Centralized global exception handling with meaningful HTTP responses
+- MySQL integration using Spring Data JPA (Hibernate)
+- Clean layered architecture (Controller → Service → Repository)
 
 
 ## 📡 API Endpoints
