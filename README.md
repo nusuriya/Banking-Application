@@ -1,9 +1,7 @@
 🏦 Banking Application – Spring Boot & JWT Authentication
 
 📌 Overview
-This project is a secure backend banking application built using Spring Boot 3 and Java 17, demonstrating modern backend development practices.
-The application exposes RESTful APIs for user authentication and banking operations, secured with JWT-based authentication using Spring Security 6.
-The project focuses on real-world concepts such as stateless authentication, layered architecture, data persistence with JPA, and robust exception handling.
+A secure Spring Boot–based banking backend implementing JWT authentication, idempotent fund transfers, and ledger‑style debit/credit transactions. The system enforces account state and balance validations, ensures transactional consistency with JPA/MySQL, and publishes asynchronous transaction events using Apache Kafka for decoupled auditing and future extensibility.
 
 
 ## 🚀 Features
