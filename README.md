@@ -49,25 +49,24 @@ The application follows a layered architecture:
 
 The application follows a layered and event‑driven architecture:
 
-
-Controller Layer
-Exposes REST APIs, handles request validation, and delegates processing.
-
-
-Service Layer
-Contains core business logic, including account validation, balance checks, idempotent transaction handling, and ledger persistence.
+- Controller Layer
+   Exposes REST APIs, handles request validation, and delegates processing.
 
 
-Repository Layer
-Handles data persistence using Spring Data JPA with MySQL.
+- Service Layer
+   Contains core business logic, including account validation, balance checks, idempotent transaction handling, and ledger persistence.
 
 
-Security Layer
-Manages user authentication and authorization using JWT and Spring Security.
+- Repository Layer
+   Handles data persistence using Spring Data JPA with MySQL.
 
 
-Event Layer (Kafka)
-Publishes transaction completion events asynchronously for non‑blocking side effects such as auditing, notifications, and analytics.
+- Security Layer
+   Manages user authentication and authorization using JWT and Spring Security.
+
+
+- Event Layer (Kafka)
+   Publishes transaction completion events asynchronously for non‑blocking side effects such as auditing, notifications, and analytics.
 
 This separation improves maintainability, testability, and scalability.
 
