@@ -1,21 +1,24 @@
 🏦 Banking Application – Spring Boot & JWT Authentication
 
 📌 Overview
-A secure Spring Boot–based banking backend implementing JWT authentication, idempotent fund transfers, and ledger‑style debit/credit transactions. The system enforces account state and balance validations, ensures transactional consistency with JPA/MySQL, and publishes asynchronous transaction events using Apache Kafka for decoupled auditing and future extensibility.
+A secure Spring Boot–based banking backend implementing JWT‑based authentication, idempotent fund transfers, and ledger‑style debit/credit transactions. The system enforces account state and balance validations, ensures transactional consistency using Spring Data JPA with MySQL, and publishes asynchronous transaction events using Apache Kafka to support decoupled auditing, notifications, and future extensibility.
 
 
 ## 🚀 Features
 
-- User registration and login  
-- JWT-based authentication (stateless security)  
-- Secure REST APIs using Spring Security  
-- Role-based authorization (ROLE_USER, expandable to ROLE_ADMIN)  
-- Account management functionality  
-- DTO-based request/response handling  
-- Input validation using Jakarta Validation (`@NotNull`, `@NotBlank`)  
-- Global exception handling with meaningful HTTP responses  
-- MySQL integration with Spring Data JPA (Hibernate)  
-- Clean architecture (Controller → Service → Repository)
+-User registration and login
+-JWT‑based authentication (stateless security)
+-Secure REST APIs using Spring Security
+-Role‑based authorization (ROLE_USER, expandable to ROLE_ADMIN)
+-Account management (create, update, close, balance tracking)
+-Idempotent fund transfer processing (exactly‑once execution)
+-Ledger‑style debit and credit transaction recording
+-Apache Kafka integration for event‑driven transaction publishing
+-DTO‑based request/response handling
+-Input validation using Jakarta Validation (@NotNull, @NotBlank)
+-Centralized global exception handling with meaningful HTTP responses
+-MySQL integration using Spring Data JPA (Hibernate)
+-Clean layered architecture (Controller → Service → Repository)
 
 
 ## 📡 API Endpoints
@@ -44,10 +47,27 @@ A secure Spring Boot–based banking backend implementing JWT authentication, id
 
 The application follows a layered architecture:
 
-- **Controller Layer** – Exposes REST APIs and handles HTTP requests
-- **Service Layer** – Contains business logic and validations
-- **Repository Layer** – Handles database interactions using Spring Data JPA
-- **Security Layer** – Manages JWT authentication and authorization
+The application follows a layered and event‑driven architecture:
+
+
+Controller Layer
+Exposes REST APIs, handles request validation, and delegates processing.
+
+
+Service Layer
+Contains core business logic, including account validation, balance checks, idempotent transaction handling, and ledger persistence.
+
+
+Repository Layer
+Handles data persistence using Spring Data JPA with MySQL.
+
+
+Security Layer
+Manages user authentication and authorization using JWT and Spring Security.
+
+
+Event Layer (Kafka)
+Publishes transaction completion events asynchronously for non‑blocking side effects such as auditing, notifications, and analytics.
 
 This separation improves maintainability, testability, and scalability.
 
